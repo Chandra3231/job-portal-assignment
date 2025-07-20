@@ -1,0 +1,19 @@
+<%- include('layout/header') %>
+
+<section style="min-height: 60vh; display: flex; align-items: center; justify-content: center; padding: 40px 0;">
+    <div class="container text-center">
+        <div style="max-width: 500px; margin: 0 auto;">
+            <h1 style="font-size: 4rem; color: var(--error-500); margin-bottom: 24px;">⚠️</h1>
+            <h2 style="color: var(--gray-800); margin-bottom: 16px;">Oops! Something went wrong</h2>
+            <p style="color: var(--gray-600); font-size: 1.125rem; margin-bottom: 32px;">
+                <%= message %>
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <a href="/" class="btn btn-primary">Go Home</a>
+                <button onclick="history.back()" class="btn btn-outline">Go Back</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('layout/footer') %>

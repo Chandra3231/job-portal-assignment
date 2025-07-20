@@ -1,0 +1,169 @@
+<%- include('layout/header') %>
+
+<section style="min-height: 80vh; display: flex; align-items: center; padding: 40px 0;">
+    <div class="container">
+        <div style="max-width: 500px; margin: 0 auto;">
+            <div class="card">
+                <div class="text-center" style="margin-bottom: 32px;">
+                    <h1>Join Elevate Workforce</h1>
+                    <p style="color: var(--gray-600);">Create your account and start your journey</p>
+                </div>
+                
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label" for="role">I am a:</label>
+                        <select id="role" name="role" class="form-select" required onchange="toggleRoleFields()">
+                            <option value="">Select your role</option>
+                            <option value="jobseeker">Job Seeker</option>
+                            <option value="company">Company</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="name">Full Name</label>
+                        <input type="text" id="name" name="name" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-input" required minlength="6">
+                        <small style="color: var(--gray-500);">Minimum 6 characters</small>
+                    </div>
+                    
+                    <!-- Company-specific fields -->
+                    <div id="companyFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="company_name">Company Name</label>
+                            <input type="text" id="company_name" name="company_name" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="industry">Industry</label>
+                            <select id="industry" name="industry" class="form-select">
+                                <option value="">Select industry</option>
+                                <option value="technology">Technology</option>
+                                <option value="finance">Finance & Banking</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="education">Education</option>
+                                <option value="manufacturing">Manufacturing</option>
+                                <option value="retail">Retail</option>
+                                <option value="hospitality">Hospitality & Tourism</option>
+                                <option value="construction">Construction</option>
+                                <option value="agriculture">Agriculture</option>
+                                <option value="government">Government</option>
+                                <option value="nonprofit">Non-Profit</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="location">Company Location</label>
+                            <input type="text" id="location" name="location" class="form-input" placeholder="e.g., Kathmandu, Nepal">
+                        </div>
+                    </div>
+                    
+                    <div id="errorMessage"></div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">
+                        <span id="registerText">Create Account</span>
+                        <span id="registerLoading" class="loading" style="display: none; margin-left: 8px;"></span>
+                    </button>
+                </form>
+                
+                <div class="text-center">
+                    <p style="color: var(--gray-600);">Already have an account? <a href="/login" style="color: var(--primary-600);">Sign in here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function toggleRoleFields() {
+    const role = document.getElementById('role').value;
+    const companyFields = document.getElementById('companyFields');
+    const nameLabel = document.querySelector('label[for="name"]');
+    
+    if (role === 'company') {
+        companyFields.style.display = 'block';
+        nameLabel.textContent = 'Contact Person Name';
+        
+        // Make company name required for companies
+        document.getElementById('company_name').required = true;
+    } else {
+        companyFields.style.display = 'none';
+        nameLabel.textContent = 'Full Name';
+        
+        // Remove company name requirement for jobseekers
+        document.getElementById('company_name').required = false;
+    }
+}
+
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const registerText = document.getElementById('registerText');
+    const registerLoading = document.getElementById('registerLoading');
+    const errorDiv = document.getElementById('errorMessage');
+    
+    // Clear previous errors
+    errorDiv.innerHTML = '';
+    
+    // Show loading state
+    submitButton.disabled = true;
+    registerText.style.display = 'none';
+    registerLoading.style.display = 'inline-block';
+    
+    try {
+        const formData = new FormData(e.target);
+        const data = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            role: formData.get('role'),
+            company_name: formData.get('company_name'),
+            industry: formData.get('industry'),
+            location: formData.get('location')
+        };
+        
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Success - redirect to dashboard
+            window.location.href = result.redirectUrl;
+        } else {
+            // Show error
+            if (result.errors) {
+                errorDiv.innerHTML = `<div class="alert alert-error">${result.errors.map(err => err.msg).join('<br>')}</div>`;
+            } else {
+                errorDiv.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
+            }
+        }
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        errorDiv.innerHTML = '<div class="alert alert-error">An error occurred. Please try again.</div>';
+    } finally {
+        // Reset button state
+        submitButton.disabled = false;
+        registerText.style.display = 'inline';
+        registerLoading.style.display = 'none';
+    }
+});
+</script>
+
+<%- include('layout/footer') %>

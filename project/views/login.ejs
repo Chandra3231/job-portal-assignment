@@ -1,0 +1,97 @@
+<%- include('layout/header') %>
+
+<section style="min-height: 80vh; display: flex; align-items: center; padding: 40px 0;">
+    <div class="container">
+        <div style="max-width: 400px; margin: 0 auto;">
+            <div class="card">
+                <div class="text-center" style="margin-bottom: 32px;">
+                    <h1>Welcome Back</h1>
+                    <p style="color: var(--gray-600);">Sign in to your account to continue</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-input" required>
+                    </div>
+                    
+                    <div id="errorMessage"></div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">
+                        <span id="loginText">Sign In</span>
+                        <span id="loginLoading" class="loading" style="display: none; margin-left: 8px;"></span>
+                    </button>
+                </form>
+                
+                <div class="text-center">
+                    <p style="color: var(--gray-600);">Don't have an account? <a href="/register" style="color: var(--primary-600);">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const loginText = document.getElementById('loginText');
+    const loginLoading = document.getElementById('loginLoading');
+    const errorDiv = document.getElementById('errorMessage');
+    
+    // Clear previous errors
+    errorDiv.innerHTML = '';
+    
+    // Show loading state
+    submitButton.disabled = true;
+    loginText.style.display = 'none';
+    loginLoading.style.display = 'inline-block';
+    
+    try {
+        const formData = new FormData(e.target);
+        const data = {
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
+        
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Success - redirect to dashboard
+            window.location.href = result.redirectUrl;
+        } else {
+            // Show error
+            if (result.errors) {
+                errorDiv.innerHTML = `<div class="alert alert-error">${result.errors.map(err => err.msg).join('<br>')}</div>`;
+            } else {
+                errorDiv.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
+            }
+        }
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        errorDiv.innerHTML = '<div class="alert alert-error">An error occurred. Please try again.</div>';
+    } finally {
+        // Reset button state
+        submitButton.disabled = false;
+        loginText.style.display = 'inline';
+        loginLoading.style.display = 'none';
+    }
+});
+</script>
+
+<%- include('layout/footer') %>

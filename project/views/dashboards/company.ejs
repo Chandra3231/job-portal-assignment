@@ -1,0 +1,489 @@
+<%- include('../layout/header') %>
+
+<section class="dashboard">
+    <div class="dashboard-header" style="background: var(--gray-800); color: white;">
+        <div class="container">
+            <h1 class="dashboard-title" style="color: white;">Company Dashboard</h1>
+            <p class="dashboard-subtitle" style="color: var(--gray-300);">Welcome back, <%= company ? company.company_name : user.name %>! Manage your job postings and applications.</p>
+        </div>
+    </div>
+    
+    <div class="dashboard-content">
+        <div class="container">
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number"><%= jobs.length %></div>
+                    <div class="stat-label">Total Job Posts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><%= jobs.filter(job => job.status === 'active').length %></div>
+                    <div class="stat-label">Active Jobs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><%= jobs.reduce((sum, job) => sum + parseInt(job.application_count), 0) %></div>
+                    <div class="stat-label">Total Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><%= company ? '✓' : '✗' %></div>
+                    <div class="stat-label">Profile Complete</div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div style="margin-bottom: 32px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>Job Management</h2>
+                    <button onclick="showCreateJobModal()" class="btn btn-primary">+ Post New Job</button>
+                </div>
+                
+                <div class="table-container">
+                    <% if (jobs.length === 0) { %>
+                        <div style="text-align: center; padding: 40px;">
+                            <p style="color: var(--gray-500);">No jobs posted yet. Create your first job posting to start receiving applications!</p>
+                            <button onclick="showCreateJobModal()" class="btn btn-primary" style="margin-top: 16px;">Post Your First Job</button>
+                        </div>
+                    <% } else { %>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Job Title</th>
+                                    <th>Location</th>
+                                    <th>Type</th>
+                                    <th>Applications</th>
+                                    <th>Status</th>
+                                    <th>Posted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% jobs.forEach(job => { %>
+                                    <tr>
+                                        <td><%= job.title %></td>
+                                        <td><%= job.location %></td>
+                                        <td><span class="job-type"><%= job.job_type.replace('-', ' ') %></span></td>
+                                        <td>
+                                            <span class="btn btn-sm btn-outline" onclick="viewApplications(<%= job.id %>)">
+                                                <%= job.application_count %> applications
+                                            </span>
+                                        </td>
+                                        <td><span class="status-badge status-<%= job.status %>"><%= job.status %></span></td>
+                                        <td><%= new Date(job.created_at).toLocaleDateString() %></td>
+                                        <td>
+                                            <button onclick="editJob(<%= job.id %>)" class="btn btn-sm btn-secondary">Edit</button>
+                                            <button onclick="deleteJob(<%= job.id %>)" class="btn btn-sm btn-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    <% } %>
+                </div>
+            </div>
+            
+            <!-- Company Profile Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Company Profile</h3>
+                </div>
+                
+                <form id="companyProfileForm">
+                    <div class="grid grid-2" style="gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label" for="company_name">Company Name</label>
+                            <input type="text" id="company_name" name="company_name" class="form-input" value="<%= company ? company.company_name : '' %>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="industry">Industry</label>
+                            <select id="industry" name="industry" class="form-select">
+                                <option value="">Select industry</option>
+                                <option value="technology" <%= company && company.industry === 'technology' ? 'selected' : '' %>>Technology</option>
+                                <option value="finance" <%= company && company.industry === 'finance' ? 'selected' : '' %>>Finance & Banking</option>
+                                <option value="healthcare" <%= company && company.industry === 'healthcare' ? 'selected' : '' %>>Healthcare</option>
+                                <option value="education" <%= company && company.industry === 'education' ? 'selected' : '' %>>Education</option>
+                                <option value="manufacturing" <%= company && company.industry === 'manufacturing' ? 'selected' : '' %>>Manufacturing</option>
+                                <option value="retail" <%= company && company.industry === 'retail' ? 'selected' : '' %>>Retail</option>
+                                <option value="hospitality" <%= company && company.industry === 'hospitality' ? 'selected' : '' %>>Hospitality & Tourism</option>
+                                <option value="construction" <%= company && company.industry === 'construction' ? 'selected' : '' %>>Construction</option>
+                                <option value="other" <%= company && company.industry === 'other' ? 'selected' : '' %>>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="location">Location</label>
+                            <input type="text" id="location" name="location" class="form-input" value="<%= company ? company.location : '' %>" placeholder="e.g., Kathmandu, Nepal">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="website">Website</label>
+                            <input type="url" id="website" name="website" class="form-input" value="<%= company ? company.website : '' %>" placeholder="https://example.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="description">Company Description</label>
+                        <textarea id="description" name="description" class="form-textarea" placeholder="Describe your company, culture, and what makes it a great place to work..."><%= company ? company.description : '' %></textarea>
+                    </div>
+                    
+                    <div id="companyProfileMessage"></div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span id="companySaveText">Update Company Profile</span>
+                        <span id="companySaveLoading" class="loading" style="display: none; margin-left: 8px;"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Create/Edit Job Modal -->
+<div id="jobModal" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 id="jobModalTitle">Create New Job</h3>
+            <button onclick="closeJobModal()" class="btn btn-secondary">✕</button>
+        </div>
+        
+        <form id="jobForm">
+            <input type="hidden" id="jobId" name="jobId">
+            
+            <div class="form-group">
+                <label class="form-label" for="job_title">Job Title</label>
+                <input type="text" id="job_title" name="title" class="form-input" required>
+            </div>
+            
+            <div class="grid grid-2" style="gap: 16px;">
+                <div class="form-group">
+                    <label class="form-label" for="job_location">Location</label>
+                    <input type="text" id="job_location" name="location" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="job_type">Job Type</label>
+                    <select id="job_type" name="job_type" class="form-select" required>
+                        <option value="full-time">Full Time</option>
+                        <option value="part-time">Part Time</option>
+                        <option value="contract">Contract</option>
+                        <option value="internship">Internship</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="salary_range">Salary Range (Optional)</label>
+                <input type="text" id="salary_range" name="salary_range" class="form-input" placeholder="e.g., NPR 50,000 - 80,000">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="job_description">Job Description</label>
+                <textarea id="job_description" name="description" class="form-textarea" rows="6" required placeholder="Describe the role, responsibilities, and what you're looking for..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="job_requirements">Requirements</label>
+                <textarea id="job_requirements" name="requirements" class="form-textarea" rows="4" placeholder="List qualifications, skills, and requirements..."></textarea>
+            </div>
+            
+            <div class="form-group" id="statusGroup" style="display: none;">
+                <label class="form-label" for="job_status">Status</label>
+                <select id="job_status" name="status" class="form-select">
+                    <option value="active">Active</option>
+                    <option value="closed">Closed</option>
+                </select>
+            </div>
+            
+            <div id="jobFormMessage"></div>
+            
+            <div style="display: flex; gap: 16px;">
+                <button type="submit" class="btn btn-primary">
+                    <span id="jobSaveText">Create Job</span>
+                    <span id="jobSaveLoading" class="loading" style="display: none; margin-left: 8px;"></span>
+                </button>
+                <button type="button" onclick="closeJobModal()" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Applications Modal -->
+<div id="applicationsModal" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 id="applicationsModalTitle">Job Applications</h3>
+            <button onclick="closeApplicationsModal()" class="btn btn-secondary">✕</button>
+        </div>
+        
+        <div id="applicationsList">
+            <!-- Applications will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+let currentJobId = null;
+
+// Company profile form
+document.getElementById('companyProfileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const saveText = document.getElementById('companySaveText');
+    const saveLoading = document.getElementById('companySaveLoading');
+    const messageDiv = document.getElementById('companyProfileMessage');
+    
+    messageDiv.innerHTML = '';
+    
+    submitButton.disabled = true;
+    saveText.style.display = 'none';
+    saveLoading.style.display = 'inline-block';
+    
+    try {
+        const formData = new FormData(e.target);
+        const data = {
+            company_name: formData.get('company_name'),
+            industry: formData.get('industry'),
+            location: formData.get('location'),
+            website: formData.get('website'),
+            description: formData.get('description')
+        };
+        
+        const response = await fetch('/api/company/profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            messageDiv.innerHTML = '<div class="alert alert-success">Company profile updated successfully!</div>';
+        } else {
+            messageDiv.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
+        }
+        
+    } catch (error) {
+        console.error('Company profile update error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-error">Failed to update profile. Please try again.</div>';
+    } finally {
+        submitButton.disabled = false;
+        saveText.style.display = 'inline';
+        saveLoading.style.display = 'none';
+    }
+});
+
+// Job form
+document.getElementById('jobForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const saveText = document.getElementById('jobSaveText');
+    const saveLoading = document.getElementById('jobSaveLoading');
+    const messageDiv = document.getElementById('jobFormMessage');
+    
+    messageDiv.innerHTML = '';
+    
+    submitButton.disabled = true;
+    saveText.style.display = 'none';
+    saveLoading.style.display = 'inline-block';
+    
+    try {
+        const formData = new FormData(e.target);
+        const data = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            requirements: formData.get('requirements'),
+            location: formData.get('location'),
+            salary_range: formData.get('salary_range'),
+            job_type: formData.get('job_type'),
+            status: formData.get('status') || 'active'
+        };
+        
+        const isEdit = currentJobId !== null;
+        const url = isEdit ? `/api/company/jobs/${currentJobId}` : '/api/company/jobs';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            messageDiv.innerHTML = `<div class="alert alert-success">Job ${isEdit ? 'updated' : 'created'} successfully!</div>`;
+            setTimeout(() => {
+                closeJobModal();
+                window.location.reload();
+            }, 1500);
+        } else {
+            messageDiv.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
+        }
+        
+    } catch (error) {
+        console.error('Job form error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-error">Failed to save job. Please try again.</div>';
+    } finally {
+        submitButton.disabled = false;
+        saveText.style.display = 'inline';
+        saveLoading.style.display = 'none';
+    }
+});
+
+function showCreateJobModal() {
+    currentJobId = null;
+    document.getElementById('jobModalTitle').textContent = 'Create New Job';
+    document.getElementById('jobSaveText').textContent = 'Create Job';
+    document.getElementById('statusGroup').style.display = 'none';
+    document.getElementById('jobForm').reset();
+    document.getElementById('jobModal').classList.add('active');
+}
+
+function closeJobModal() {
+    document.getElementById('jobModal').classList.remove('active');
+    document.getElementById('jobFormMessage').innerHTML = '';
+}
+
+async function editJob(jobId) {
+    try {
+        const response = await fetch(`/api/company/jobs`);
+        const jobs = await response.json();
+        const job = jobs.find(j => j.id === jobId);
+        
+        if (job) {
+            currentJobId = jobId;
+            document.getElementById('jobModalTitle').textContent = 'Edit Job';
+            document.getElementById('jobSaveText').textContent = 'Update Job';
+            document.getElementById('statusGroup').style.display = 'block';
+            
+            // Populate form
+            document.getElementById('job_title').value = job.title;
+            document.getElementById('job_location').value = job.location;
+            document.getElementById('job_type').value = job.job_type;
+            document.getElementById('salary_range').value = job.salary_range || '';
+            document.getElementById('job_description').value = job.description;
+            document.getElementById('job_requirements').value = job.requirements || '';
+            document.getElementById('job_status').value = job.status;
+            
+            document.getElementById('jobModal').classList.add('active');
+        }
+    } catch (error) {
+        console.error('Error loading job for edit:', error);
+        alert('Failed to load job details');
+    }
+}
+
+async function deleteJob(jobId) {
+    if (confirm('Are you sure you want to delete this job? This action cannot be undone.')) {
+        try {
+            const response = await fetch(`/api/company/jobs/${jobId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to delete job');
+            }
+        } catch (error) {
+            console.error('Error deleting job:', error);
+            alert('Failed to delete job');
+        }
+    }
+}
+
+async function viewApplications(jobId) {
+    try {
+        const response = await fetch('/api/company/applications');
+        const applications = await response.json();
+        
+        const jobApplications = applications.filter(app => app.job_id === jobId);
+        
+        document.getElementById('applicationsModalTitle').textContent = `Applications for Job #${jobId}`;
+        
+        if (jobApplications.length === 0) {
+            document.getElementById('applicationsList').innerHTML = '<p style="text-align: center; padding: 40px;">No applications received yet.</p>';
+        } else {
+            document.getElementById('applicationsList').innerHTML = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Contact</th>
+                                <th>Status</th>
+                                <th>Applied</th>
+                                <th>Resume</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${jobApplications.map(app => `
+                                <tr>
+                                    <td>
+                                        <strong>${app.name}</strong><br>
+                                        <small style="color: var(--gray-500);">${app.jobseeker_email}</small>
+                                    </td>
+                                    <td>${app.phone || 'N/A'}</td>
+                                    <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                                    <td>${new Date(app.applied_at).toLocaleDateString()}</td>
+                                    <td>
+                                        ${app.resume_path ? `<a href="${app.resume_path}" target="_blank" class="btn btn-sm btn-outline">View</a>` : 'No resume'}
+                                    </td>
+                                    <td>
+                                        <select onchange="updateApplicationStatus(${app.id}, this.value)" class="form-select" style="width: auto; font-size: 12px;">
+                                            <option value="pending" ${app.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="reviewed" ${app.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
+                                            <option value="accepted" ${app.status === 'accepted' ? 'selected' : ''}>Accepted</option>
+                                            <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        document.getElementById('applicationsModal').classList.add('active');
+    } catch (error) {
+        console.error('Error loading applications:', error);
+        alert('Failed to load applications');
+    }
+}
+
+function closeApplicationsModal() {
+    document.getElementById('applicationsModal').classList.remove('active');
+}
+
+async function updateApplicationStatus(applicationId, newStatus) {
+    try {
+        const response = await fetch(`/api/company/applications/${applicationId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        if (response.ok) {
+            // Status updated successfully
+            console.log('Application status updated');
+        } else {
+            alert('Failed to update application status');
+        }
+    } catch (error) {
+        console.error('Error updating application status:', error);
+        alert('Failed to update application status');
+    }
+}
+</script>
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,216 @@
+<%- include('layout/header') %>
+
+<section style="padding: 80px 0;">
+    <div class="container">
+        <div class="text-center" style="margin-bottom: 64px;">
+            <h1>Contact Elevate Workforce Solutions</h1>
+            <p style="color: var(--gray-600); font-size: 1.125rem;">Get in touch with our team for any inquiries or support</p>
+        </div>
+        
+        <div class="grid grid-2" style="gap: 64px;">
+            <div>
+                <h2>Get In Touch</h2>
+                <p style="color: var(--gray-600); margin-bottom: 32px;">We're here to help you with your career journey or recruitment needs. Contact us through any of the following channels:</p>
+                
+                <div style="margin-bottom: 32px;">
+                    <div class="card">
+                        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                            <span style="font-size: 1.5rem; margin-right: 16px;">📧</span>
+                            <div>
+                                <h4>Email</h4>
+                                <p style="margin: 0; color: var(--gray-600);">info@elevate.com.np</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 32px;">
+                    <div class="card">
+                        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                            <span style="font-size: 1.5rem; margin-right: 16px;">📞</span>
+                            <div>
+                                <h4>Phone</h4>
+                                <p style="margin: 0; color: var(--gray-600);">+977-1-4444444</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 32px;">
+                    <div class="card">
+                        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                            <span style="font-size: 1.5rem; margin-right: 16px;">📍</span>
+                            <div>
+                                <h4>Office</h4>
+                                <p style="margin: 0; color: var(--gray-600);">Kathmandu, Nepal<br>Business District</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="card">
+                        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                            <span style="font-size: 1.5rem; margin-right: 16px;">🕒</span>
+                            <div>
+                                <h4>Business Hours</h4>
+                                <p style="margin: 0; color: var(--gray-600);">
+                                    Sunday - Friday: 9:00 AM - 6:00 PM<br>
+                                    Saturday: 10:00 AM - 4:00 PM
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="card">
+                    <h3>Send us a Message</h3>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label class="form-label" for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="subject">Subject *</label>
+                            <select id="subject" name="subject" class="form-select" required>
+                                <option value="">Select a subject</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="jobseeker">Job Seeker Support</option>
+                                <option value="employer">Employer Services</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="partnership">Partnership Opportunity</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="message">Message *</label>
+                            <textarea id="message" name="message" class="form-textarea" rows="6" required placeholder="Please describe your inquiry in detail..."></textarea>
+                        </div>
+                        
+                        <div id="formMessage"></div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <span id="submitText">Send Message</span>
+                            <span id="submitLoading" class="loading" style="display: none; margin-left: 8px;"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="background: var(--gray-100); padding: 80px 0;">
+    <div class="container">
+        <div class="text-center" style="margin-bottom: 48px;">
+            <h2>Frequently Asked Questions</h2>
+            <p style="color: var(--gray-600);">Find answers to common questions about our services</p>
+        </div>
+        
+        <div style="max-width: 800px; margin: 0 auto;">
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="faq-question" onclick="toggleFAQ(this)" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <h4>How do I create a profile on your platform?</h4>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                    <p style="color: var(--gray-600);">Simply click on "Register" in the top navigation, choose your role (Job Seeker or Company), and fill out the required information. You'll be able to complete your profile after registration.</p>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="faq-question" onclick="toggleFAQ(this)" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <h4>Is there a fee for using your services?</h4>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                    <p style="color: var(--gray-600);">For job seekers, our basic services are completely free. Companies may have premium options for enhanced job posting features and recruitment services.</p>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="faq-question" onclick="toggleFAQ(this)" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <h4>How long does it take to hear back from employers?</h4>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                    <p style="color: var(--gray-600);">Response times vary by employer, but most companies respond within 1-2 weeks. You can track your application status in your dashboard.</p>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="faq-question" onclick="toggleFAQ(this)" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <h4>Can I apply to multiple jobs at once?</h4>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-200);">
+                    <p style="color: var(--gray-600);">Yes, you can apply to as many relevant positions as you'd like. We encourage applying to multiple opportunities that match your skills and interests.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const submitText = document.getElementById('submitText');
+    const submitLoading = document.getElementById('submitLoading');
+    const messageDiv = document.getElementById('formMessage');
+    
+    // Show loading state
+    submitButton.disabled = true;
+    submitText.style.display = 'none';
+    submitLoading.style.display = 'inline-block';
+    
+    try {
+        // Simulate form submission (replace with actual API call)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Show success message
+        messageDiv.innerHTML = '<div class="alert alert-success">Thank you for your message! We will get back to you within 24 hours.</div>';
+        
+        // Reset form
+        e.target.reset();
+        
+    } catch (error) {
+        console.error('Contact form error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-error">Failed to send message. Please try again or contact us directly.</div>';
+    } finally {
+        // Reset button state
+        submitButton.disabled = false;
+        submitText.style.display = 'inline';
+        submitLoading.style.display = 'none';
+    }
+});
+
+function toggleFAQ(element) {
+    const answer = element.nextElementSibling;
+    const toggle = element.querySelector('.faq-toggle');
+    
+    if (answer.style.display === 'none') {
+        answer.style.display = 'block';
+        toggle.textContent = '−';
+    } else {
+        answer.style.display = 'none';
+        toggle.textContent = '+';
+    }
+}
+</script>
+
+<%- include('layout/footer') %>

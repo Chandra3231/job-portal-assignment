@@ -1,0 +1,171 @@
+<%- include('layout/header') %>
+
+<section class="hero">
+    <div class="container">
+        <h1>Find Your Dream Job in Nepal</h1>
+        <p>Connect with top employers and advance your career with Elevate Workforce Solutions</p>
+        <div class="search-box">
+            <input type="text" placeholder="Job title, keywords..." class="search-input" id="searchInput">
+            <input type="text" placeholder="Location" class="search-input" id="locationInput">
+            <button class="btn btn-primary" onclick="searchJobs()">Search Jobs</button>
+        </div>
+    </div>
+</section>
+
+<section style="padding: 80px 0;">
+    <div class="container">
+        <div class="text-center" style="margin-bottom: 64px;">
+            <h2>Why Choose Elevate Workforce?</h2>
+            <p style="color: var(--gray-600); font-size: 1.125rem;">We connect Nepal's best talent with leading companies</p>
+        </div>
+        
+        <div class="grid grid-3">
+            <div class="card text-center">
+                <div style="width: 80px; height: 80px; background: var(--primary-100); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 2rem;">🎯</span>
+                </div>
+                <h4>Targeted Matching</h4>
+                <p style="color: var(--gray-600);">Our advanced matching system connects you with opportunities that align with your skills and career goals.</p>
+            </div>
+            
+            <div class="card text-center">
+                <div style="width: 80px; height: 80px; background: var(--secondary-100); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 2rem;">🤝</span>
+                </div>
+                <h4>Trusted Partners</h4>
+                <p style="color: var(--gray-600);">We work with Nepal's most reputable companies across all industries to bring you quality opportunities.</p>
+            </div>
+            
+            <div class="card text-center">
+                <div style="width: 80px; height: 80px; background: var(--accent-100); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 2rem;">📈</span>
+                </div>
+                <h4>Career Growth</h4>
+                <p style="color: var(--gray-600);">Get personalized career guidance and access to exclusive opportunities for professional development.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="background: var(--gray-100); padding: 80px 0;">
+    <div class="container">
+        <div class="text-center" style="margin-bottom: 48px;">
+            <h2>Featured Job Opportunities</h2>
+            <p style="color: var(--gray-600);">Discover exciting career opportunities from our partner companies</p>
+        </div>
+        
+        <div id="featuredJobs" class="grid grid-2">
+            <!-- Featured jobs will be loaded here -->
+        </div>
+        
+        <div class="text-center" style="margin-top: 48px;">
+            <a href="/jobs" class="btn btn-primary">View All Jobs</a>
+        </div>
+    </div>
+</section>
+
+<section style="padding: 80px 0;">
+    <div class="container">
+        <div class="grid grid-2" style="align-items: center; gap: 64px;">
+            <div>
+                <h2>Ready to Elevate Your Career?</h2>
+                <p style="color: var(--gray-600); font-size: 1.125rem; margin-bottom: 32px;">Join thousands of professionals who have found their dream jobs through our platform. Create your profile today and let opportunities come to you.</p>
+                <div style="display: flex; gap: 16px;">
+                    <a href="/register" class="btn btn-primary">Get Started</a>
+                    <a href="/about" class="btn btn-outline">Learn More</a>
+                </div>
+            </div>
+            <div>
+                <div class="card">
+                    <h4>Quick Stats</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 24px;">
+                        <div class="text-center">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">Jobs Posted</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="stat-number">1000+</div>
+                            <div class="stat-label">Professionals</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="stat-number">200+</div>
+                            <div class="stat-label">Companies</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="stat-number">95%</div>
+                            <div class="stat-label">Success Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function searchJobs() {
+    const search = document.getElementById('searchInput').value;
+    const location = document.getElementById('locationInput').value;
+    
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (location) params.append('location', location);
+    
+    window.location.href = `/jobs?${params.toString()}`;
+}
+
+// Load featured jobs
+async function loadFeaturedJobs() {
+    try {
+        const response = await fetch('/api/jobs?limit=4');
+        const data = await response.json();
+        
+        const container = document.getElementById('featuredJobs');
+        
+        if (data.jobs && data.jobs.length > 0) {
+            container.innerHTML = data.jobs.map(job => `
+                <div class="job-card" onclick="window.location.href='/jobs?id=${job.id}'">
+                    <div class="job-card-header">
+                        <div>
+                            <h3 class="job-title">${job.title}</h3>
+                            <div class="company-name">${job.company_name}</div>
+                            <div class="job-location">📍 ${job.location}</div>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="job-type">${job.job_type}</span>
+                        ${job.salary_range ? `<span class="job-salary">${job.salary_range}</span>` : ''}
+                    </div>
+                    <p class="job-description">${job.description}</p>
+                    <div style="margin-top: 16px;">
+                        <span class="btn btn-primary btn-sm">View Details</span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<p style="text-align: center; color: var(--gray-500); grid-column: 1 / -1;">No featured jobs available at the moment.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading featured jobs:', error);
+        document.getElementById('featuredJobs').innerHTML = '<p style="text-align: center; color: var(--error-500); grid-column: 1 / -1;">Failed to load jobs. Please try again later.</p>';
+    }
+}
+
+// Load featured jobs on page load
+document.addEventListener('DOMContentLoaded', loadFeaturedJobs);
+
+// Add Enter key support for search
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchJobs();
+    }
+});
+
+document.getElementById('locationInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchJobs();
+    }
+});
+</script>
+
+<%- include('layout/footer') %>

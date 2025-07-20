@@ -1,0 +1,327 @@
+<%- include('../layout/header') %>
+
+<section class="dashboard">
+    <div class="dashboard-header">
+        <div class="container">
+            <h1 class="dashboard-title">Jobseeker Dashboard</h1>
+            <p class="dashboard-subtitle">Welcome back, <%= profile ? profile.name : user.name %>! Manage your profile and track your applications.</p>
+        </div>
+    </div>
+    
+    <div class="dashboard-content">
+        <div class="container">
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalApplications"><%= applications.length %></div>
+                    <div class="stat-label">Total Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingApplications">
+                        <%= applications.filter(app => app.status === 'pending').length %>
+                    </div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="interviewInvites">
+                        <%= applications.filter(app => app.status === 'accepted').length %>
+                    </div>
+                    <div class="stat-label">Accepted</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><%= profile && profile.resume_path ? '✓' : '✗' %></div>
+                    <div class="stat-label">Resume Status</div>
+                </div>
+            </div>
+            
+            <!-- Main Content Grid -->
+            <div class="grid grid-2" style="gap: 32px;">
+                <!-- Profile Section -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Profile Information</h3>
+                        </div>
+                        
+                        <form id="profileForm">
+                            <div class="form-group">
+                                <label class="form-label" for="name">Full Name</label>
+                                <input type="text" id="name" name="name" class="form-input" value="<%= profile ? profile.name : '' %>" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="email">Email</label>
+                                <input type="email" id="email" name="email" class="form-input" value="<%= profile ? profile.email : '' %>" readonly style="background: var(--gray-100);">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" class="form-input" value="<%= profile && profile.phone ? profile.phone : '' %>">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="experience">Work Experience</label>
+                                <textarea id="experience" name="experience" class="form-textarea" placeholder="Describe your work experience, skills, and achievements..."><%= profile && profile.experience ? profile.experience : '' %></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="skills">Skills</label>
+                                <textarea id="skills" name="skills" class="form-textarea" placeholder="List your key skills, technologies, and competencies..."><%= profile && profile.skills ? profile.skills : '' %></textarea>
+                            </div>
+                            
+                            <div id="profileMessage"></div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <span id="profileSaveText">Update Profile</span>
+                                <span id="profileSaveLoading" class="loading" style="display: none; margin-left: 8px;"></span>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Resume Upload -->
+                    <div class="card" style="margin-top: 24px;">
+                        <div class="card-header">
+                            <h3 class="card-title">Resume Management</h3>
+                        </div>
+                        
+                        <% if (profile && profile.resume_path) { %>
+                            <div class="alert alert-success">
+                                ✓ Resume uploaded successfully
+                                <a href="<%= profile.resume_path %>" target="_blank" class="btn btn-sm btn-outline" style="margin-left: 16px;">View Resume</a>
+                            </div>
+                        <% } else { %>
+                            <div class="alert alert-warning">
+                                ⚠️ No resume uploaded. Upload your resume to apply for jobs.
+                            </div>
+                        <% } %>
+                        
+                        <form id="resumeForm" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label class="form-label" for="resume">Upload Resume (PDF/DOC only)</label>
+                                <input type="file" id="resume" name="resume" class="form-input" accept=".pdf,.doc,.docx">
+                                <small style="color: var(--gray-500);">Maximum file size: 5MB</small>
+                            </div>
+                            
+                            <div id="resumeMessage"></div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <span id="resumeUploadText">Upload Resume</span>
+                                <span id="resumeUploadLoading" class="loading" style="display: none; margin-left: 8px;"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Applications Section -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">My Applications</h3>
+                        </div>
+                        
+                        <% if (applications.length === 0) { %>
+                            <div style="text-align: center; padding: 40px;">
+                                <p style="color: var(--gray-500);">No applications yet. <a href="/jobs" style="color: var(--primary-600);">Browse jobs</a> to get started!</p>
+                            </div>
+                        <% } else { %>
+                            <div style="max-height: 600px; overflow-y: auto;">
+                                <% applications.forEach(app => { %>
+                                    <div style="border-bottom: 1px solid var(--gray-200); padding: 16px 0;">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                            <h4 style="margin: 0;"><%= app.job_title %></h4>
+                                            <span class="status-badge status-<%= app.status %>"><%= app.status %></span>
+                                        </div>
+                                        <p style="color: var(--gray-600); margin: 4px 0;"><%= app.company_name %></p>
+                                        <p style="color: var(--gray-500); font-size: 14px; margin: 0;">Applied on <%= new Date(app.applied_at).toLocaleDateString() %></p>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="card" style="margin-top: 24px;">
+                        <div class="card-header">
+                            <h3 class="card-title">Quick Actions</h3>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <a href="/jobs" class="btn btn-primary">Browse All Jobs</a>
+                            <a href="/jobs?search=&location=" class="btn btn-outline">Search Jobs</a>
+                            <button onclick="showApplicationModal()" class="btn btn-secondary">Quick Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Application Modal -->
+<div id="applicationModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3>Quick Job Application</h3>
+            <button onclick="closeApplicationModal()" class="btn btn-secondary">✕</button>
+        </div>
+        
+        <div id="applicationForm">
+            <!-- Application form will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Profile update form
+document.getElementById('profileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const saveText = document.getElementById('profileSaveText');
+    const saveLoading = document.getElementById('profileSaveLoading');
+    const messageDiv = document.getElementById('profileMessage');
+    
+    messageDiv.innerHTML = '';
+    
+    submitButton.disabled = true;
+    saveText.style.display = 'none';
+    saveLoading.style.display = 'inline-block';
+    
+    try {
+        const formData = new FormData(e.target);
+        const data = {
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            experience: formData.get('experience'),
+            skills: formData.get('skills')
+        };
+        
+        const response = await fetch('/api/jobseeker/profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            messageDiv.innerHTML = '<div class="alert alert-success">Profile updated successfully!</div>';
+        } else {
+            messageDiv.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
+        }
+        
+    } catch (error) {
+        console.error('Profile update error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-error">Failed to update profile. Please try again.</div>';
+    } finally {
+        submitButton.disabled = false;
+        saveText.style.display = 'inline';
+        saveLoading.style.display = 'none';
+    }
+});
+
+// Resume upload form
+document.getElementById('resumeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const uploadText = document.getElementById('resumeUploadText');
+    const uploadLoading = document.getElementById('resumeUploadLoading');
+    const messageDiv = document.getElementById('resumeMessage');
+    
+    messageDiv.innerHTML = '';
+    
+    const fileInput = document.getElementById('resume');
+    if (!fileInput.files[0]) {
+        messageDiv.innerHTML = '<div class="alert alert-error">Please select a resume file to upload.</div>';
+        return;
+    }
+    
+    submitButton.disabled = true;
+    uploadText.style.display = 'none';
+    uploadLoading.style.display = 'inline-block';
+    
+    try {
+        const formData = new FormData(e.target);
+        
+        const response = await fetch('/api/jobseeker/resume', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            messageDiv.innerHTML = '<div class="alert alert-success">Resume uploaded successfully!</div>';
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            messageDiv.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
+        }
+        
+    } catch (error) {
+        console.error('Resume upload error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-error">Failed to upload resume. Please try again.</div>';
+    } finally {
+        submitButton.disabled = false;
+        uploadText.style.display = 'inline';
+        uploadLoading.style.display = 'none';
+    }
+});
+
+function showApplicationModal() {
+    document.getElementById('applicationModal').classList.add('active');
+    loadQuickApplicationForm();
+}
+
+function closeApplicationModal() {
+    document.getElementById('applicationModal').classList.remove('active');
+}
+
+async function loadQuickApplicationForm() {
+    try {
+        // Load recent jobs for quick application
+        const response = await fetch('/api/jobs?limit=5');
+        const data = await response.json();
+        
+        if (data.jobs && data.jobs.length > 0) {
+            document.getElementById('applicationForm').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Select a job to apply:</label>
+                    <select id="quickJobSelect" class="form-select">
+                        <option value="">Choose a job...</option>
+                        ${data.jobs.map(job => `
+                            <option value="${job.id}">${job.title} - ${job.company_name}</option>
+                        `).join('')}
+                    </select>
+                </div>
+                <button onclick="applyToSelectedJob()" class="btn btn-primary">Apply Now</button>
+            `;
+        } else {
+            document.getElementById('applicationForm').innerHTML = '<p>No jobs available for quick application. <a href="/jobs">Browse all jobs</a></p>';
+        }
+    } catch (error) {
+        console.error('Error loading quick application form:', error);
+        document.getElementById('applicationForm').innerHTML = '<p>Failed to load quick application form.</p>';
+    }
+}
+
+function applyToSelectedJob() {
+    const jobId = document.getElementById('quickJobSelect').value;
+    if (jobId) {
+        window.location.href = `/jobs?apply=${jobId}`;
+    }
+}
+
+// Check for apply parameter in URL
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('apply')) {
+    // Show application form for specific job
+    showApplicationModal();
+}
+</script>
+
+<%- include('../layout/footer') %>
